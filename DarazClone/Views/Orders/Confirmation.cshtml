@@ -1,0 +1,57 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Order Confirmed";
+}
+
+<div class="text-center py-5">
+
+    <div style="font-size:80px">✅</div>
+
+    <h2 class="fw-bold mt-3">Order Placed Successfully!</h2>
+
+    <p class="text-muted">
+        Order #@Model.Id — Thank you for shopping at ShopPK
+    </p>
+
+    <div class="card border-0 shadow-sm mx-auto mt-4"
+         style="max-width:500px">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Order Date</span>
+                <span>@Model.OrderDate.ToString("dd MMM yyyy")</span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Status</span>
+                <span class="badge bg-warning text-dark">
+                    @Model.Status
+                </span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Shipping To</span>
+                <span>@Model.ShippingAddress</span>
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between fw-bold fs-5">
+                <span>Total</span>
+                <span class="text-danger">
+                    Rs. @Model.TotalAmount.ToString("N0")
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="Home" asp-action="Index"
+           class="btn btn-orange px-4">
+            Continue Shopping
+        </a>
+    </div>
+
+</div>

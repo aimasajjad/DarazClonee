@@ -1,0 +1,96 @@
+﻿@model List<Product>
+
+@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">Admin Panel — Products</h3>
+    <a asp-controller="Admin" asp-action="Create"
+       class="btn btn-orange">
+        + Add New Product
+    </a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center py-5">
+        <p class="text-muted">No products yet. Add your first product.</p>
+        <a asp-controller="Admin" asp-action="Create"
+           class="btn btn-orange">
+            + Add Product
+        </a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl"
+                                     style="width:50px;height:50px;object-fit:cover"
+                                     class="rounded" />
+                            }
+                            else
+                            {
+                                <span style="font-size:30px">🛍️</span>
+                            }
+                        </td>
+                        <td class="fw-bold">@p.Name</td>
+                        <td>@p.Category?.Name</td>
+                        <td class="text-danger fw-bold">
+                            Rs. @p.Price.ToString("N0")
+                        </td>
+                        <td>@p.StockQuantity</td>
+                        <td>
+                            @if (p.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-controller="Admin"
+                               asp-action="Edit"
+                               asp-route-id="@p.Id"
+                               class="btn btn-sm btn-outline-primary me-1">
+                                Edit
+                            </a>
+                            <form asp-controller="Admin"
+                                  asp-action="Delete"
+                                  method="post"
+                                  class="d-inline">
+                                <input type="hidden" name="id" value="@p.Id" />
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Delete this product?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

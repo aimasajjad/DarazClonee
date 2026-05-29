@@ -1,0 +1,118 @@
+﻿@model List<Product>
+
+@{
+    ViewData["Title"] = "ShopPK - Online Shopping";
+}
+
+<!-- Hero Banner -->
+<div class="p-5 mb-4 rounded-3 text-white"
+     style="background: linear-gradient(135deg, #f57224, #ff9a56)">
+    <div class="py-3">
+        <h1 class="display-5 fw-bold">Welcome to ShopPK</h1>
+        <p class="fs-5">
+            Millions of products at your fingertips.
+            Fast delivery across Pakistan.
+        </p>
+        <a asp-controller="Products" asp-action="Index"
+           class="btn btn-light btn-lg">
+            Shop Now →
+        </a>
+    </div>
+</div>
+
+<!-- Categories -->
+<h4 class="fw-bold mb-3">Shop by Category</h4>
+<div class="row row-cols-3 row-cols-md-6 g-2 mb-5">
+    @if (ViewBag.Categories != null)
+    {
+        @foreach (var cat in ViewBag.Categories)
+        {
+            <div class="col">
+                <a asp-controller="Products"
+                   asp-action="Index"
+                   asp-route-categoryId="@cat.Id"
+                   class="card border-0 shadow-sm text-center
+                    text-decoration-none text-dark p-3 d-block">
+                    <div style="font-size:32px">🛍️</div>
+                    <small class="fw-bold">@cat.Name</small>
+                </a>
+            </div>
+        }
+    }
+</div>
+
+<!-- Featured Products -->
+<h4 class="fw-bold mb-3">Featured Products</h4>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="text-center py-5">
+        <p class="text-muted">No products available yet.</p>
+        <p class="text-muted small">
+            Add products from the Admin panel to see them here.
+        </p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-2 row-cols-md-4 g-3">
+        @foreach (var p in Model)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm product-card">
+
+                    @if (!string.IsNullOrEmpty(p.ImageUrl))
+                    {
+                        <img src="@p.ImageUrl"
+                             class="card-img-top"
+                             style="height:180px;object-fit:cover"
+                             alt="@p.Name"
+                             onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image'" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center
+                            justify-content-center"
+                             style="height:180px;font-size:48px">
+                            🛍️
+                        </div>
+                    }
+
+                    <div class="card-body p-2">
+                        <span class="badge bg-warning text-dark small mb-1">
+                            @p.Category?.Name
+                        </span>
+                        <p class="small mb-1 text-truncate fw-bold"
+                           title="@p.Name">
+                            @p.Name
+                        </p>
+                        <p class="fw-bold text-danger mb-2">
+                            Rs. @p.Price.ToString("N0")
+                        </p>
+                        <div class="d-flex gap-1">
+                            <a asp-controller="Products"
+                               asp-action="Detail"
+                               asp-route-id="@p.Id"
+                               class="btn btn-outline-secondary btn-sm">
+                                View
+                            </a>
+                            <form asp-controller="Cart"
+                                  asp-action="Add"
+                                  method="post"
+                                  class="flex-grow-1">
+                                <input type="hidden"
+                                       name="productId"
+                                       value="@p.Id" />
+                                <button type="submit"
+                                        class="btn btn-warning btn-sm w-100">
+                                    Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
