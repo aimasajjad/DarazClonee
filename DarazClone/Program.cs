@@ -4,16 +4,20 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext
+// 1. Database Configuration (Configured for Railway MySQL)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-// Fix — use IdentityUser not IdentityUser
+// 2. Identity Services Configuration
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// 3. Register Dummy Email Sender to bypass production validation
 builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, DummyEmailSender>();
+
+// 4. Production Application Cookie Protection
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
@@ -23,15 +27,14 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// Add MVC
+// 5. MVC & Distributed State Configuration
 builder.Services.AddControllersWithViews();
-
-// Add Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
 var app = builder.Build();
 
+// 6. HTTP Request Pipeline Configuration (Middleware Ordering)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -40,18 +43,21 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// 7. Routing Maps Setup
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 
-// Automatically apply migrations on startup
+// 8. Automated Migration Handler on Boot
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -63,16 +69,17 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating the database.");
+        logger.LogError(ex, "An error occurred while migrating the production database.");
     }
 }
+
 app.Run();
-// Fake email sender to bypass the production dependency check
+
+// 9. Identity UI Validation Bypass Helper
 public class DummyEmailSender : Microsoft.AspNetCore.Identity.UI.Services.IEmailSender
 {
     public Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        // Just returns a completed task without doing anything!
         return Task.CompletedTask;
     }
 }
